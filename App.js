@@ -7,10 +7,16 @@ import { LinearGradient } from "expo-linear-gradient";
 
 export default function App() {
 
-  const [state,setState] = useState([])
+  const [state,setState] = useState({
+    temp: 20,
+    clothes: []
+  })
 
   useEffect(()=>{
-    setState(clothesData.data)
+    setState({
+      temp: 20,
+      clothes: clothesData["data"]
+    })
   },[])
 
 
@@ -24,8 +30,8 @@ export default function App() {
         </LinearGradient> 
 
         <View style={styles.clothesRecom}>
-        {state.map((data,i)=>{
-                    return <RecommendCard key={i} brand={data.brand} name={data.name} brand={data.brand} name={data.name} price={data.price} image={data.image}/>
+        {state["clothes"].map((data,i)=>{
+                    return <RecommendCard key={i} data={data}/>
                   })}
         </View>
 

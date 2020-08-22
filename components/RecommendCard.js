@@ -1,17 +1,17 @@
 import React,{useState, useEffect} from 'react';
 import { Image, StyleSheet, Text, View,ScrollView, Dimensions,TouchableOpacity,ImageBackground } from 'react-native';
 
-const RecommendCard = ({brand, name, price, image}) => {
+const RecommendCard = ({data}) => {
 
     return (
         <TouchableOpacity style={styles.clothesCard}>
-            <Image style={styles.img} source={{uri: image}}/>
+            <Image style={styles.img} source={{uri: data.image}} resizeMode="contain"/>
         
             <View style={styles.text}>
               <View style={styles.clothesInfo}>
-                <Text style={styles.brand}>{brand}</Text>
-                <Text style={styles.name}>{name}</Text>
-                <Text style={styles.price}>{price}</Text>
+                <Text style={styles.brand}>{data.brand}</Text>
+                <Text style={styles.name}>{data.name}</Text>
+                <Text style={styles.price}>{data.price}</Text>
               </View>
 
               <View style={styles.btn}>
@@ -44,9 +44,9 @@ clothesCard: {
     borderWidth: 1
   },
   img: {
-    width: 70,
-    height: 90,
-    marginLeft: 20,
+    width: 80,
+    height: 100,
+    marginLeft: 10,
     marginBottom: 10
   },
   text: {
@@ -77,24 +77,22 @@ clothesCard: {
     height: 40,
     backgroundColor: "orange",
     borderRadius: 10,
-    justifyContent: "center",
-    alignItems: "center"
+    padding: 10
   },
   dibsText: {
     color: "white",
-    fontSize: 15
+    fontSize: 14
   },
   detailBtn: {
     width: 120,
     height: 40,
     backgroundColor: "hotpink",
     borderRadius: 10,
-    justifyContent: "center",
-    alignItems: "center",
+    padding: 10,
     marginLeft: 15
   },
   detailBtnText: {
     color: "white",
-    fontSize: 15
+    fontSize: 14
   }
 });
