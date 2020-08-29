@@ -9,7 +9,7 @@ import { AppLoading } from 'expo';
 //expo install expo-font 로 설치
 import * as Font from "expo-font";
 //expo install @expo/vector-icons 로 설치
-import { Ionicons, FontAwesome } from "@expo/vector-icons";
+import { Ionicons} from "@expo/vector-icons";
 
 import { StatusBar } from 'expo-status-bar';
 
@@ -24,7 +24,7 @@ export default function App() {
   const funcStart = () => {
     console.log("시작")
     //아이온 아이콘 폰트와 폰트 어썸 폰트 모두 폰트 캐시에 등록
-    cacheFonts([Ionicons.font, FontAwesome.font]);
+    cacheFonts([Ionicons.font]);
   }
 
   const funcError = () => {
@@ -41,7 +41,7 @@ export default function App() {
   return isLoading ? <AppLoading startAsync={funcStart} onError={funcError} onFinish={funcFinish} /> : (
  
     <NavigationContainer>
-      <StatusBar style="black" />
+      <StatusBar style="light" />
       <StackNavigator/>
    </NavigationContainer>
   )

@@ -1,5 +1,5 @@
 import React,{useState, useEffect} from 'react';
-import { Image, StyleSheet, Text, View,ScrollView,TouchableOpacity } from 'react-native';
+import {StyleSheet, Text, View} from 'react-native';
 
 export default LikePage = ({navigation}) => {
     
@@ -10,19 +10,14 @@ export default LikePage = ({navigation}) => {
     },[])
     
     return (
-    <View style={styles.Background}>
         <View style={styles.readyContainer}>
             <Text style={styles.readyText}>찜 페이지...</Text>
         </View>
-    </View>
     )
 }
 
 const styles = StyleSheet.create({
-    Background: {
-        flex: 1,
-        backgroundColor: "black",
-    },
+    
     readyContainer: {
         flex:1,
         alignItems: "center",
