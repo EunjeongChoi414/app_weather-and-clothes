@@ -1,68 +1,48 @@
-import React,{useState, useEffect} from 'react';
-import { Image, StyleSheet, Text, View,ScrollView,TouchableOpacity } from 'react-native';
-import RecommendCard from "./components/RecommendCard";
-import clothesData from "./clothes.json";
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { LinearGradient } from "expo-linear-gradient";
+import React,{useState} from 'react';
+
+//메인에 세팅할 네비게이션 도구들을 가져옵니다.
+import {NavigationContainer} from '@react-navigation/native';
+import StackNavigator from './navigation/StackNavigator'
+
+import { AppLoading } from 'expo';
+
+//expo install expo-font 로 설치
+import * as Font from "expo-font";
+//expo install @expo/vector-icons 로 설치
+import { Ionicons, FontAwesome } from "@expo/vector-icons";
+
+import { StatusBar } from 'expo-status-bar';
 
 export default function App() {
 
-  const [state,setState] = useState({
-    temp: 20,
-    clothes: []
-  })
+  //로딩중에 대한 상태 관리 === 처음엔 당연히 로딩중이니 값이 true 겠죠?
+  const [isLoading,setIsLoading] = useState(true)
 
-  useEffect(()=>{
-    setState({
-      temp: 20,
-      clothes: clothesData["data"]
-    })
-  },[])
+  //배열에 담긴 폰트들을 차례대로 하나씩 앱에 적재 시키는 함수
+  const cacheFonts = fonts => fonts.map(font => Font.loadAsync(font));
 
+  const funcStart = () => {
+    console.log("시작")
+    //아이온 아이콘 폰트와 폰트 어썸 폰트 모두 폰트 캐시에 등록
+    cacheFonts([Ionicons.font, FontAwesome.font]);
+  }
 
-  return (
-    <View style={styles.container}>
-      <ScrollView>
-        
-        <LinearGradient colors={["#FF7300", "#FEF253"]} style={styles.weather}>
-          <MaterialCommunityIcons name="weather-sunny" size={120} color="white" />
-          <Text style={styles.temperature}>20°</Text>
-        </LinearGradient> 
+  const funcError = () => {
+    console.log("에러")
+  }
 
-        <View style={styles.clothesRecom}>
-        {state["clothes"].map((data,i)=>{
-                    return <RecommendCard key={i} data={data}/>
-                  })}
-        </View>
+  const funcFinish = () => {
+    console.log("완료")
+    //앱 로딩이 완료되면 로딩 상태를 false로 변경하여, 
+    //더이상 로딩 상태가 아니게 바꿉니다
+    setIsLoading(false)
+  }
 
-      </ScrollView>
-    </View>
-    
-  );
+  return isLoading ? <AppLoading startAsync={funcStart} onError={funcError} onFinish={funcFinish} /> : (
+ 
+    <NavigationContainer>
+      <StatusBar style="black" />
+      <StackNavigator/>
+   </NavigationContainer>
+  )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    backgroundColor: "white",
-  },
-  weather: {
-    backgroundColor: "orange",
-    alignItems: "center",
-    justifyContent: "center",
-    width:370,
-    height:270,
-    marginTop: 25,
-    borderRadius: 12,
-
-  },
-  temperature: {
-    color: 'white',
-    fontSize: 35
-  },
-  clothesRecom: {
-    alignItems: "center"
-  },
-  
-});
