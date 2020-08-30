@@ -4,6 +4,7 @@ import { Image, StyleSheet, Text, View,ScrollView, Dimensions,TouchableOpacity,I
 const RecommendCard = ({data}) => {
 
     return (
+      <View style={styles.clothes}>
         <TouchableOpacity style={styles.clothesCard}>
             <Image style={styles.img} source={{uri: data.image}} resizeMode="contain"/>
         
@@ -24,13 +25,17 @@ const RecommendCard = ({data}) => {
               </View>
             </View>
           </TouchableOpacity>
+      </View>
     )
 }
 export default RecommendCard;
 
 
 const styles = StyleSheet.create({
-
+clothes:{
+  flex: 1,
+  alignItems: "center"
+},
 clothesCard: {
     flexDirection:"row",
     alignItems: "center",
