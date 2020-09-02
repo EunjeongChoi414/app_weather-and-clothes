@@ -1,7 +1,6 @@
 import React,{useState,useEffect} from "react";
 import { View, Text, StyleSheet, StatusBar, ScrollView,Alert,Platform } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import clothes from "../clothes.json"
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import RecommendCard from "../components/RecommendCard"
@@ -10,6 +9,7 @@ import RecommendCard from "../components/RecommendCard"
 import * as Location from "expo-location";
 //외부 API 요청 도구
 import axios from "axios"
+import {firebase_db} from "../firebaseConfig"
 
 const weatherData = {
   "data" : {
@@ -49,6 +49,18 @@ const weatherData = {
           "title": "구름이 많습니다!",
           "subtitle": "우울해 하지말고 나가 놀기 ㅎ"
       },
+      "weather-cloudy" : {
+        "iconName": "weather-cloudy",
+        "gradient": ["#D7D2CC", "#304352"],
+        "title": "구름이 많습니다!",
+        "subtitle": "우울해 하지말고 나가 놀기 ㅎ"
+      },
+      "weather-hail" :{
+        "iconName": "weather-cloudy",
+        "gradient": ["#D7D2CC", "#304352"],
+        "title": "구름이 많습니다!",
+        "subtitle": "우울해 하지말고 나가 놀기 ㅎ"
+      },
       "Mist": {
           "iconName": "weather-hail",
           "gradient": ["#4DA0B0", "#D39D38"],
@@ -66,6 +78,12 @@ const weatherData = {
           "gradient": ["#4DA0B0", "#D39D38"],
           "title": "안개까 낀것 처럼 흐린 날...",
           "subtitle": "흐리니 우울우울 하지말긔"
+      },
+      "Smoke": {
+        "iconName": "weather-hail",
+        "gradient": ["#4DA0B0", "#D39D38"],
+        "title": "안개까 낀것 처럼 흐린 날...",
+        "subtitle": "흐리니 우울우울 하지말긔"
       }
 }
 }
@@ -82,11 +100,17 @@ export default function MainPage() {
     colors:["#373B44", "#4286f4"],
     //현재 기온
     temp:0,
-    clothes:[]
   })
 
+  const [clothesState, setClothesState] = useState([])
+
   useEffect(()=>{
-    getLocation();
+    firebase_db.ref('/data').once('value').then((snapshot) => {
+      console.log("파이어베이스에서 데이터 가져왔습니다!!")
+      let data = snapshot.val();
+      setClothesState(data)
+      getLocation();
+    });
   },[])
 
   const getLocation = async () => {
@@ -123,14 +147,16 @@ export default function MainPage() {
       //pickClothes 리스트에 온도에 맞는 옷을 담습니다
       let pickClothes = []
 
-      for(let i=0; i<clothes['data'].length; i++){
+      for(let i=0; i<clothesState.length; i++){
         let temp5up = temp + 5;
         let temp5down = temp - 5;
 
-        if(clothes['data'][i]['temperature'] <= temp5up && clothes['data'][i]['temperature'] >= temp5down){
-          pickClothes.push(clothes['data'][i])
+        if(clothesState[i]['temperature'] <= temp5up && clothesState[i]['temperature'] >= temp5down){
+          pickClothes.push(clothesState[i])
         }
       }
+      await setClothesState(pickClothes)
+      console.log(clothesState)
 
       //위치 정보와 모든 날씨 데이터가 준비된다음, 
       //그리고 원하는 데이터까지 갖게 된다음 상태 값을 변경하기 위해 await를 붙였습니다
@@ -143,9 +169,9 @@ export default function MainPage() {
         iconName:iconName,
         //현재 기온
         temp:temp,
-        colors:colors,
-        clothes:pickClothes
+        colors:colors
       })
+    
 
 
 
@@ -156,8 +182,6 @@ export default function MainPage() {
       Alert.alert("위치를 찾을 수가 없습니다.", "앱을 껏다 켜볼까요?");
     }
   }
-
-  console.log(state)
 
   return state.isLoading ? ( 
   
@@ -171,20 +195,18 @@ export default function MainPage() {
     <ScrollView style={styles.weatherwrap}>
       <LinearGradient
       colors={state.colors}
-      style={styles.container}
-    >
+      style={styles.container}>
       <StatusBar barStyle="dark-content" />
       <View style={styles.halfContainer}>
         <MaterialCommunityIcons
           size={96}
           name={state.iconName}
-          color="white"
-        />
+          color="white"/>
         <Text style={styles.temp}>{state.temp}°</Text>
       </View>
       </LinearGradient>
 
-    {state.clothes.map((c,i)=>{
+    {clothesState.map((c,i)=>{
       return (<RecommendCard key={i} data={c}/>)
     })}
       
