@@ -1,6 +1,7 @@
 import React,{useState,useEffect} from "react";
 import { View, Text, StyleSheet, StatusBar, ScrollView,Alert,Platform } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import RecommendCard from "../components/RecommendCard"
@@ -9,7 +10,12 @@ import RecommendCard from "../components/RecommendCard"
 import * as Location from "expo-location";
 //외부 API 요청 도구
 import axios from "axios"
+//파이어베이스를 사용할 땐 항상 설정 파일을 임포트하기
 import {firebase_db} from "../firebaseConfig"
+
+//파이어 베이스에서 데이터를 가져오니 주석 처리
+// import clothes from "../clothes.json"
+
 
 const weatherData = {
   "data" : {
@@ -48,18 +54,6 @@ const weatherData = {
           "gradient": ["#D7D2CC", "#304352"],
           "title": "구름이 많습니다!",
           "subtitle": "우울해 하지말고 나가 놀기 ㅎ"
-      },
-      "weather-cloudy" : {
-        "iconName": "weather-cloudy",
-        "gradient": ["#D7D2CC", "#304352"],
-        "title": "구름이 많습니다!",
-        "subtitle": "우울해 하지말고 나가 놀기 ㅎ"
-      },
-      "weather-hail" :{
-        "iconName": "weather-cloudy",
-        "gradient": ["#D7D2CC", "#304352"],
-        "title": "구름이 많습니다!",
-        "subtitle": "우울해 하지말고 나가 놀기 ㅎ"
       },
       "Mist": {
           "iconName": "weather-hail",
@@ -100,25 +94,18 @@ export default function MainPage() {
     colors:["#373B44", "#4286f4"],
     //현재 기온
     temp:0,
+    clothes:[]
   })
 
-  const [clothesState, setClothesState] = useState([])
-
   useEffect(()=>{
-    firebase_db.ref('/data').once('value').then((snapshot) => {
-      console.log("파이어베이스에서 데이터 가져왔습니다!!")
-      let data = snapshot.val();
-      setClothesState(data)
-      getLocation();
-    });
+    getLocation();
   },[])
 
   const getLocation = async () => {
     try {
       await Location.requestPermissionsAsync();
       const locationData= await Location.getCurrentPositionAsync();
-      console.log(locationData['coords']['latitude'])
-      console.log(locationData['coords']['longitude'])
+
       const latitude = locationData['coords']['latitude'];
       const longitude = locationData['coords']['longitude'];
       //스파르타코딩 클럽에서 발급받은 키값
@@ -130,7 +117,7 @@ export default function MainPage() {
       const temp = result['data']['main']['temp']; 
       const condition = result['data']['weather'][0]['main']
       console.log(condition)
-      console.log(temp)
+
 
 
       //화면에 사용할 아이콘 이름 가져오기
@@ -139,39 +126,41 @@ export default function MainPage() {
 
       //그라데이션 도구에 넣을 색상값 꺼내오기
       const colors = weatherData['data'][condition]["gradient"]
-      console.log(iconName)
-      console.log(colors)
+
 
       //clothes.json 데이터에서
       //현재 기온보다 5도 낮거나 5도 높은 범위의 알맞은 옷을 가져오기
       //pickClothes 리스트에 온도에 맞는 옷을 담습니다
       let pickClothes = []
 
-      for(let i=0; i<clothesState.length; i++){
-        let temp5up = temp + 5;
-        let temp5down = temp - 5;
-
-        if(clothesState[i]['temperature'] <= temp5up && clothesState[i]['temperature'] >= temp5down){
-          pickClothes.push(clothesState[i])
+      //await & async를 어떤 짝을 이루어 사용됐는 지 확인해보세요!
+      //감싸는 함수 앞에 async, 내부에선 await
+      await firebase_db.ref('/data').once('value').then(async (snapshot) => {
+        console.log("파이어베이스에서 데이터 가져왔습니다!!")
+        let clothes = snapshot.val();
+        for(let i=0; i<clothes.length; i++){
+          let temp5up = temp + 5;
+          let temp5down = temp - 5;
+  
+          if(clothes[i]['temperature'] <= temp5up && clothes[i]['temperature'] >= temp5down){
+            pickClothes.push(clothes[i])
+          }
         }
-      }
-      await setClothesState(pickClothes)
-      console.log(clothesState)
+        
+        await setState({
+          isLoading:false,
+          //현재 날씨 명칭: Cloud, Sunny 와 같은...
+          condition:condition,
+          iconName:iconName,
+          //현재 기온
+          temp:temp,
+          colors:colors,
+          clothes:pickClothes
+        })
 
-      //위치 정보와 모든 날씨 데이터가 준비된다음, 
-      //그리고 원하는 데이터까지 갖게 된다음 상태 값을 변경하기 위해 await를 붙였습니다
-      //순서 고정!!
-      //상태 값이 변경되면 화면이 다시 그려지겠죠?
-      await setState({
-        isLoading:false,
-        //현재 날씨 명칭: Cloud, Sunny 와 같은...
-        condition:condition,
-        iconName:iconName,
-        //현재 기온
-        temp:temp,
-        colors:colors
-      })
-    
+      });
+
+      
 
 
 
@@ -183,11 +172,13 @@ export default function MainPage() {
     }
   }
 
+  console.log(state)
+
   return state.isLoading ? ( 
   
   <View style={styles.readyContainer}>
     <StatusBar barStyle="dark-content" />
-    <Text style={styles.readyText}>날씨 앱 로딩중 🤷‍♂️</Text>
+    <Text style={styles.readyText}>스파르타 날씨 앱 로딩중 🤷‍♂️</Text>
   </View>
   ) 
   
@@ -195,18 +186,20 @@ export default function MainPage() {
     <ScrollView style={styles.weatherwrap}>
       <LinearGradient
       colors={state.colors}
-      style={styles.container}>
+      style={styles.container}
+    >
       <StatusBar barStyle="dark-content" />
       <View style={styles.halfContainer}>
         <MaterialCommunityIcons
           size={96}
           name={state.iconName}
-          color="white"/>
+          color="white"
+        />
         <Text style={styles.temp}>{state.temp}°</Text>
       </View>
       </LinearGradient>
 
-    {clothesState.map((c,i)=>{
+    {state.clothes.map((c,i)=>{
       return (<RecommendCard key={i} data={c}/>)
     })}
       

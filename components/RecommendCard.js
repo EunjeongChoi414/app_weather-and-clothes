@@ -1,8 +1,27 @@
 import React,{useState, useEffect} from 'react';
-import { Image, StyleSheet, Text, View,ScrollView, Dimensions,TouchableOpacity,ImageBackground } from 'react-native';
+import { Image, StyleSheet, Text, View,ScrollView, Dimensions,TouchableOpacity,ImageBackground,Alert } from 'react-native';
+import Constants from 'expo-constants';
+import {firebase_db} from "../firebaseConfig"
 
 const RecommendCard = ({data}) => {
+  const goLike = () => {
+    const like = {
+      image: data.image,
+      brand: data.brand,
+      name: data.name,
+      price: data.price,
+      idx: data.idx
+    }
+    const user_id = Constants.installationId;
 
+    firebase_db.ref('/like/'+user_id+'/'+ data.idx).set(like,function(error){
+      console.log(error)
+      if(error == null){
+          //저장에 문제가 없을 경우에만 결과 페이지로 이동!
+          Alert.alert("저장완료");
+          }
+        })  
+    };
     return (
       <View style={styles.clothes}>
         <TouchableOpacity style={styles.clothesCard}>
@@ -16,7 +35,7 @@ const RecommendCard = ({data}) => {
               </View>
 
               <View style={styles.btn}>
-                <TouchableOpacity style={styles.dibs}>
+                <TouchableOpacity style={styles.dibs} onPress={()=>goLike()}>
                   <Text style={styles.dibsText}>찜하기</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.detailBtn}>
